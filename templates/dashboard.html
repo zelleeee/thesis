@@ -1,10 +1,290 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container">
-    <div class="auth-box">
-        <div class="logo"><h1>🌾 Welcome, {{ name }}!</h1></div>
-        <p style="text-align:center;">You are now logged in to the HarvestIQ Marketplace.</p>
-        <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #56ab2f;
+        }
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .navbar .role-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .navbar .role-badge.farmer {
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+            color: white;
+        }
+
+        .navbar .role-badge.buyer {
+            background: linear-gradient(135deg, #4a90e2, #7bb3ff);
+            color: white;
+        }
+
+        .navbar .role-badge.admin {
+            background: linear-gradient(135deg, #e53935, #ff6f60);
+            color: white;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e53935, #ff6f60);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(229, 57, 53, 0.4);
+        }
+
+        .dashboard-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-section h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert.error {
+            background-color: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .action-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-color: #56ab2f;
+        }
+
+        .action-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .action-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .action-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                text-align: center;
+            }
+
+            .navbar .user-info {
+                flex-direction: column;
+            }
+
+            .dashboard-content {
+                padding: 25px;
+            }
+
+            .welcome-section h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">🌾 HarvestIQ</div>
+            <div class="user-info">
+                <span class="user-name">{{ name }}</span>
+                <span class="role-badge {{ role }}">{{ role }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </nav>
+
+        <div class="dashboard-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="welcome-section">
+                <h1>Welcome, {{ name }}! 👋</h1>
+                <p>What would you like to do today?</p>
+            </div>
+
+            <div class="action-cards">
+                {% if role == 'farmer' %}
+                    <a href="{{ url_for('submit_product') }}" class="action-card">
+                        <div class="icon">📦</div>
+                        <h3>Submit Product</h3>
+                        <p>List your products for admin review and marketplace listing</p>
+                    </a>
+                    <a href="{{ url_for('my_submissions') }}" class="action-card">
+                        <div class="icon">📋</div>
+                        <h3>My Submissions</h3>
+                        <p>View and track your product submissions</p>
+                    </a>
+                {% elif role == 'admin' %}
+                    <a href="{{ url_for('admin_review') }}" class="action-card">
+                        <div class="icon">✅</div>
+                        <h3>Review Products</h3>
+                        <p>Approve or reject farmer product submissions</p>
+                    </a>
+                    <a href="#" class="action-card">
+                        <div class="icon">📊</div>
+                        <h3>Manage Listings</h3>
+                        <p>View and manage approved products</p>
+                    </a>
+                {% elif role == 'buyer' %}
+                    <a href="#" class="action-card">
+                        <div class="icon">🛒</div>
+                        <h3>Browse Products</h3>
+                        <p>Find and purchase agricultural products</p>
+                    </a>
+                    <a href="#" class="action-card">
+                        <div class="icon">📦</div>
+                        <h3>My Orders</h3>
+                        <p>Track your purchases and orders</p>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

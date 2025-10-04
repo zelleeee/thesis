@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Marketplace - HarvestIQ{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto">
+<header class="bg-white shadow-lg rounded-xl p-6 mb-8 border-t-4 border-emerald-600">
+<h1 class="text-4xl font-extrabold text-gray-900 mb-2">Marketplace Seller Center 👋</h1>
+<p class="text-xl text-gray-500">Welcome, {{ name }}. Manage your product listings and sales orders.</p>
+<div class="mt-4 inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-green-100 text-green-800">
+User Role: {{ role }}
+</div>
+</header>
+
+<!-- Marketplace Actions and Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Quick Action Card -->
+    <div class="bg-emerald-600 p-6 rounded-xl shadow-xl text-white md:col-span-1 flex flex-col justify-between">
+        <div>
+            <h3 class="text-2xl font-bold mb-2">List New Harvest</h3>
+            <p class="text-emerald-100">Quickly create a new product listing for your fresh crops.</p>
+        </div>
+        <button class="mt-4 w-full bg-white text-emerald-600 font-semibold py-2 rounded-lg shadow-md hover:bg-emerald-50 transition duration-150 transform hover:scale-[1.02]">
+            + Create Listing
+        </button>
+    </div>
+
+    <!-- Inventory Overview -->
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 md:col-span-2">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Your Active Listings (Placeholder)</h3>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                <span class="font-medium text-gray-700">Premium Tomatoes (150kg)</span>
+                <span class="text-sm text-green-600 font-semibold">Live</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                <span class="font-medium text-gray-700">Organic Corn (300 bags)</span>
+                <span class="text-sm text-yellow-600 font-semibold">Draft</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                <span class="font-medium text-gray-700">Fresh Lettuce (50 crates)</span>
+                <span class="text-sm text-green-600 font-semibold">Live</span>
+            </div>
+            
+            <a href="#" class="block text-center mt-4 text-emerald-600 hover:text-emerald-700 font-medium transition duration-150">
+                View All Listings
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Orders and Analytics Placeholder -->
+<div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Sales Orders & Metrics</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+        <div class="p-4 rounded-lg bg-blue-50">
+            <p class="text-3xl font-bold text-blue-600">3</p>
+            <p class="text-sm text-gray-600">Pending Orders</p>
+        </div>
+        <div class="p-4 rounded-lg bg-yellow-50">
+            <p class="text-3xl font-bold text-yellow-600">₱12,500</p>
+            <p class="text-sm text-gray-600">Revenue (30 Days)</p>
+        </div>
+        <div class="p-4 rounded-lg bg-red-50">
+            <p class="text-3xl font-bold text-red-600">1</p>
+            <p class="text-sm text-gray-600">Low Stock Alert</p>
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ - Submit Product</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #56ab2f;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            padding: 35px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-banner::before {
+            content: '&#x1F4E6;';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            top: -20px;
+            right: 20px;
+        }
+
+        .header-banner h1 {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-banner p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 15px;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 60%;
+            width: 80%;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: -1;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step-circle {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: shake 0.5s ease;
+        }
+
+        .alert.error {
+            background-color: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .alert.error::before {
+            content: '&#x26A0;&#xFE0F;';
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            padding-bottom: 30px;
+            border-bottom: 2px dashed #e0e0e0;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-group label .required {
+            color: #e53935;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 13px 15px 13px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+            padding-top: 15px;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 41px;
+            font-size: 18px;
+            color: #999;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #56ab2f;
+            box-shadow: 0 0 0 4px rgba(86, 171, 47, 0.1);
+        }
+
+        .form-group input:focus + .input-icon,
+        .form-group select:focus + .input-icon,
+        .form-group textarea:focus + .input-icon {
+            color: #56ab2f;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border-left: 4px solid #56ab2f;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #2e7d32;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .info-box::before {
+            content: '&#x2139;&#xFE0F;';
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            padding-left: 5px;
+        }
+
+        .price-preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .price-preview.show {
+            display: block;
+        }
+
+        .price-preview .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .price-preview .value {
+            font-size: 24px;
+            color: #56ab2f;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-submit:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(86, 171, 47, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 30px 25px;
+            }
+
+            .progress-steps {
+                padding: 0;
+            }
+
+            .step-label {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('dashboard') }}" class="back-button">
+            &larr; Back to Dashboard
+        </a>
+
+        <div class="form-box">
+            <div class="header-banner">
+                <h1>&#x1F4E6; Submit Product</h1>
+                <p>List your agricultural products for review</p>
+            </div>
+
+            <div class="form-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="progress-steps">
+                    <div class="step active">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Product Info</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Pricing</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Availability</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    Your product will be reviewed by an admin before being listed in the marketplace. This usually takes 1-2 business days.
+                </div>
+
+                <form method="POST" action="{{ url_for('submit_product') }}" id="productForm">
+                    <!-- Product Information Section -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="icon">&#x1F331;</span>
+                            Product Information
+                        </h2>
+
+                        <div class="form-group">
+                            <label for="product_name">
+                                Product Name <span class="required">*</span>
+                            </label>
+                            <input type="text" id="product_name" name="product_name" placeholder="e.g., Organic Rice, Fresh Tomatoes" required>
+                            <span class="input-icon">&#x1F33E;</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">
+                                Category <span class="required">*</span>
+                            </label>
+                            <select id="category" name="category" required>
+                                <option value="">Select a category</option>
+                                <option value="grains">Grains & Cereals</option>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="fruits">Fruits</option>
+                                <option value="herbs">Herbs & Spices</option>
+                                <option value="livestock">Livestock Products</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="input-icon">&#x1F4C1;</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">
+                                Description <span class="required">*</span>
+                            </label>
+                            <textarea id="description" name="description" placeholder="Describe your product quality, growing methods, certifications, etc." required></textarea>
+                            <span class="input-icon">&#x1F4DD;</span>
+                            <div class="helper-text">Provide detailed information to help buyers make informed decisions</div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity & Pricing Section -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="icon">&#x1F4B0;</span>
+                            Quantity & Pricing
+                        </h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="quantity">
+                                    Quantity Available <span class="required">*</span>
+                                </label>
+                                <input type="number" id="quantity" name="quantity" placeholder="0" step="0.01" min="0.01" required>
+                                <span class="input-icon">&#x2696;&#xFE0F;</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="unit">
+                                    Unit <span class="required">*</span>
+                                </label>
+                                <select id="unit" name="unit" required>
+                                    <option value="">Select unit</option>
+                                    <option value="kg">Kilograms (kg)</option>
+                                    <option value="g">Grams (g)</option>
+                                    <option value="lbs">Pounds (lbs)</option>
+                                    <option value="tons">Tons</option>
+                                    <option value="pieces">Pieces</option>
+                                    <option value="sacks">Sacks</option>
+                                </select>
+                                <span class="input-icon">&#x1F4CF;</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="price">
+                                Price per Kilogram <span class="required">*</span>
+                            </label>
+                            <input type="number" id="price" name="price" placeholder="0.00" step="0.01" min="0.01" required>
+                            <span class="input-icon">&#x20B1;</span>
+                            <div class="helper-text">Set a competitive price per kilogram</div>
+                            <div class="price-preview" id="pricePreview">
+                                <div class="label">Price per kg:</div>
+                                <div class="value">&#x20B1;<span id="priceValue">0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Section -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="icon">&#x1F4C5;</span>
+                            Availability
+                        </h2>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="harvest_date">
+                                    Harvest Date <span class="required">*</span>
+                                </label>
+                                <input type="date" id="harvest_date" name="harvest_date" required>
+                                <span class="input-icon">&#x1F4C5;</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="duration">
+                                    Available Duration (days) <span class="required">*</span>
+                                </label>
+                                <input type="number" id="duration" name="duration" placeholder="e.g., 30" min="1" required>
+                                <span class="input-icon">&#x23F0;</span>
+                                <div class="helper-text">How many days will this product be available?</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Submit for Review &#x1F680;</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Price preview
+        const priceInput = document.getElementById('price');
+        const pricePreview = document.getElementById('pricePreview');
+        const priceValue = document.getElementById('priceValue');
+
+        priceInput.addEventListener('input', function() {
+            const price = parseFloat(this.value);
+            if (price > 0) {
+                pricePreview.classList.add('show');
+                priceValue.textContent = price.toFixed(2);
+            } else {
+                pricePreview.classList.remove('show');
+            }
+        });
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('harvest_date').setAttribute('max', today);
+    </script>
+</body>
+</html>

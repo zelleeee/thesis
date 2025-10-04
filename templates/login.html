@@ -22,7 +22,6 @@
             overflow: hidden;
         }
 
-        /* Animated environmental background effect */
         body::before {
             content: '';
             position: absolute;
@@ -38,7 +37,6 @@
             animation: pulse 15s ease-in-out infinite;
         }
 
-        /* Floating particles effect (leaves/seeds) */
         body::after {
             content: '';
             position: absolute;
@@ -109,7 +107,7 @@
         }
 
         .header-banner::before {
-            content: '🌾';
+            content: '\1F33E';
             position: absolute;
             font-size: 80px;
             opacity: 0.1;
@@ -119,7 +117,7 @@
         }
 
         .header-banner::after {
-            content: '🌱';
+            content: '\1F331';
             position: absolute;
             font-size: 60px;
             opacity: 0.1;
@@ -180,7 +178,7 @@
         }
 
         .alert::before {
-            content: '⚠️';
+            content: '\26A0\FE0F';
             font-size: 18px;
         }
 
@@ -197,7 +195,7 @@
         }
 
         .alert.success::before {
-            content: '✅';
+            content: '\2705';
         }
 
         form {
@@ -215,13 +213,6 @@
             color: #333;
             font-weight: 500;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .form-group label .icon {
-            font-size: 16px;
         }
 
         input {
@@ -345,7 +336,6 @@
             text-decoration: underline;
         }
 
-        /* Responsive design */
         @media (max-width: 480px) {
             .form-container {
                 padding: 30px 25px;
@@ -361,7 +351,7 @@
     <div class="login-container">
         <div class="login-box">
             <div class="header-banner">
-                <h1>🌾 HarvestIQ</h1>
+                <h1>&#x1F33E; HarvestIQ</h1>
                 <p>Smart Agriculture Management</p>
             </div>
 
@@ -381,22 +371,22 @@
 
                 <form method="POST" action="{{ url_for('login') }}">
                     <div class="form-group">
-                        <label for="email"><span class="icon">📧</span> Email Address</label>
+                        <label for="email">&#x1F4E7; Email Address</label>
                         <input type="email" id="email" name="email" placeholder="your@email.com" required autofocus>
-                        <span class="input-icon">📧</span>
+                        <span class="input-icon">&#x1F4E7;</span>
                     </div>
                     
                     <div class="form-group">
-                        <label for="password"><span class="icon">🔒</span> Password</label>
-                        <input type="password" id="password" name="password" placeholder="••••••••" required>
-                        <span class="input-icon">🔒</span>
+                        <label for="password">&#x1F512; Password</label>
+                        <input type="password" id="password" name="password" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" required>
+                        <span class="input-icon">&#x1F512;</span>
                     </div>
 
                     <div class="forgot-password">
                         <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
                     </div>
                     
-                    <button type="submit">Login 🚀</button>
+                    <button type="submit">Login &#x1F680;</button>
                 </form>
 
                 <div class="register-link">

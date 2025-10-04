@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ - Review Products</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #56ab2f;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, #e53935 0%, #ff6f60 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header-banner h1 {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-banner p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 15px;
+        }
+
+        .content-container {
+            padding: 40px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert.success::before {
+            content: '\2705';
+        }
+
+        .alert.error {
+            background-color: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .review-grid {
+            display: grid;
+            gap: 25px;
+        }
+
+        .review-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .review-card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .farmer-info .icon {
+            font-size: 24px;
+        }
+
+        .farmer-info .details {
+            flex: 1;
+        }
+
+        .farmer-info .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .farmer-info .email {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .product-header {
+            margin-bottom: 20px;
+        }
+
+        .product-header h3 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .product-header .category {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .description-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .action-buttons form {
+            margin: 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .btn-chat {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+            color: white;
+        }
+
+        .btn-chat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            animation: pulse-badge 2s infinite;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.4);
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .stats-banner {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #e53935;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 25px;
+            }
+
+            .product-details {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-banner {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('dashboard') }}" class="back-button">
+            &larr; Back to Dashboard
+        </a>
+
+        <div class="content-box">
+            <div class="header-banner">
+                <h1>&#x2705; Review Product Submissions</h1>
+                <p>Approve or reject farmer submissions</p>
+            </div>
+
+            <div class="content-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% if pending_products|length > 0 %}
+                    <div class="stats-banner">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ pending_products|length }}</div>
+                            <div class="stat-label">Pending Reviews</div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if pending_products|length == 0 %}
+                    <div class="empty-state">
+                        <div class="icon">&#x2705;</div>
+                        <h3>All Caught Up!</h3>
+                        <p>There are no pending product submissions to review.</p>
+                    </div>
+                {% else %}
+                    <div class="review-grid">
+                        {% for product in pending_products %}
+                            <div class="review-card">
+                                <div class="farmer-info">
+                                    <span class="icon">&#x1F468;&#x200D;&#x1F33E;</span>
+                                    <div class="details">
+                                        <div class="name">{{ product.farmer_name }}</div>
+                                        <div class="email">{{ product.farmer_email }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="product-header">
+                                    <h3>{{ product.product_name }}</h3>
+                                    <span class="category">{{ product.category }}</span>
+                                </div>
+
+                                <div class="product-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Quantity</span>
+                                        <span class="detail-value">{{ product.quantity }} {{ product.unit }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Price per Kilo</span>
+                                        <span class="detail-value">&#x20B1;{{ "%.2f"|format(product.price) }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Harvest Date</span>
+                                        <span class="detail-value">{{ product.harvest_date }}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Available Duration</span>
+                                        <span class="detail-value">{{ product.duration }} days</span>
+                                    </div>
+                                </div>
+
+                                <div class="product-description">
+                                    <span class="description-label">Description</span>
+                                    {{ product.description }}
+                                </div>
+
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('admin_chat', product_id=product.id) }}" class="btn btn-chat">
+                                        &#x1F4AC; Chat
+                                        {% if product.unread_count > 0 %}
+                                            <span class="badge">{{ product.unread_count }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin_approve', product_id=product.id) }}">
+                                        <button type="submit" class="btn btn-approve">&#x2713; Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('admin_reject', product_id=product.id) }}">
+                                        <button type="submit" class="btn btn-reject">&#x2717; Reject</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
