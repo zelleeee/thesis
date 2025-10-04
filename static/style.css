@@ -1,0 +1,112 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+    padding: 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header-banner {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    text-align: center;
+    padding: 25px 20px;
+    color: white;
+}
+
+.header-banner h1 {
+    margin-bottom: 8px;
+    font-size: 28px;
+}
+
+.form-container {
+    padding: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #56ab2f;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(86,171,47,0.2);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(86, 171, 47, 0.4);
+}
+
+.forgot-password,
+.register-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.forgot-password a,
+.register-link a {
+    color: #56ab2f;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.forgot-password a:hover,
+.register-link a:hover {
+    text-decoration: underline;
+}

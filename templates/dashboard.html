@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="auth-box">
+        <div class="logo"><h1>🌾 Welcome, {{ name }}!</h1></div>
+        <p style="text-align:center;">You are now logged in to the HarvestIQ Marketplace.</p>
+        <a href="{{ url_for('logout') }}"><button class="btn">Logout</button></a>
+    </div>
+</div>
+{% endblock %}

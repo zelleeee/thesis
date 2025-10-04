@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ - Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        /* Animated environmental background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(76, 175, 80, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(205, 220, 57, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        /* Floating particles effect (leaves/seeds) */
+        body::after {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 33% 80%, rgba(255, 255, 255, 0.3), transparent);
+            background-size: 200% 200%;
+            background-position: 0% 0%;
+            animation: float 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                background-position: 0% 0%;
+                opacity: 0.6;
+            }
+            50% { 
+                background-position: 100% 100%;
+                opacity: 0.8;
+            }
+        }
+
+        .register-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .register-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-banner::before {
+            content: '🌾';
+            position: absolute;
+            font-size: 80px;
+            opacity: 0.1;
+            top: -10px;
+            left: -10px;
+            animation: rotate 20s linear infinite;
+        }
+
+        .header-banner::after {
+            content: '🌱';
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.1;
+            bottom: -10px;
+            right: -10px;
+            animation: rotate 15s linear infinite reverse;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header-banner h1 {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-banner p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 15px;
+        }
+
+        .form-container {
+            padding: 35px 40px 40px;
+        }
+
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .welcome-text h3 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .alert {
+            background-color: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #c33;
+            font-size: 14px;
+            animation: shake 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert::before {
+            content: '⚠️';
+            font-size: 18px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .alert.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left-color: #2e7d32;
+        }
+
+        .alert.success::before {
+            content: '✅';
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-group label .icon {
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px 13px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 41px;
+            font-size: 18px;
+            color: #999;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-group input:focus {
+            border-color: #56ab2f;
+            box-shadow: 0 0 0 4px rgba(86, 171, 47, 0.1);
+        }
+
+        .form-group input:focus + .input-icon {
+            color: #56ab2f;
+        }
+
+        .form-group input::placeholder {
+            color: #bbb;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 13px 15px 13px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .form-group select:focus {
+            border-color: #56ab2f;
+            box-shadow: 0 0 0 4px rgba(86, 171, 47, 0.1);
+        }
+
+        .form-group select:focus + .input-icon {
+            color: #56ab2f;
+        }
+
+        .form-group select option {
+            padding: 10px;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength.show {
+            display: block;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .password-strength-bar.weak { width: 33%; background: #f44336; }
+        .password-strength-bar.medium { width: 66%; background: #ff9800; }
+        .password-strength-bar.strong { width: 100%; background: #4caf50; }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .password-requirements::before {
+            content: 'ℹ️';
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            border-color: #56ab2f;
+            background: #f0f8f0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 3px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #56ab2f;
+        }
+
+        .checkbox-group label {
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            user-select: none;
+            line-height: 1.5;
+        }
+
+        .checkbox-group a {
+            color: #56ab2f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .login-link p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .login-link a {
+            color: #56ab2f;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #3d7a22;
+            text-decoration: underline;
+        }
+
+        .benefits {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f8f0 0%, #e8f5e9 100%);
+            border-radius: 10px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #2e7d32;
+        }
+
+        .benefit-item::before {
+            content: '✓';
+            width: 20px;
+            height: 20px;
+            background: #56ab2f;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 30px 25px;
+            }
+
+            .header-banner h1 {
+                font-size: 26px;
+            }
+
+            .benefits {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-box">
+            <div class="header-banner">
+                <h1>🌾 HarvestIQ</h1>
+                <p>Join the Future of Agriculture</p>
+            </div>
+
+            <div class="form-container">
+                <div class="welcome-text">
+                    <h3>Create Your Account</h3>
+                    <p>Start managing your farm smarter today</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="benefits">
+                    <div class="benefit-item">Free to join</div>
+                    <div class="benefit-item">Easy to use</div>
+                    <div class="benefit-item">Buy or Sell</div>
+                    <div class="benefit-item">24/7 support</div>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                    <div class="form-group">
+                        <label for="name"><span class="icon">👤</span> Full Name</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required autofocus>
+                        <span class="input-icon">👤</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email"><span class="icon">📧</span> Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                        <span class="input-icon">📧</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role"><span class="icon">🎯</span> I am a...</label>
+                        <select id="role" name="role" required>
+                            <option value="">Select your role</option>
+                            <option value="farmer">🌾 Farmer / Seller</option>
+                            <option value="buyer">🛒 Buyer</option>
+                        </select>
+                        <span class="input-icon">🎯</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password"><span class="icon">🔒</span> Password</label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required minlength="8">
+                        <span class="input-icon">🔒</span>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="password-requirements">
+                            Must be at least 8 characters long
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password"><span class="icon">🔐</span> Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" required>
+                        <span class="input-icon">🔐</span>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">
+                            I agree to the <a href="{{ url_for('terms') }}" target="_blank">Terms & Conditions</a> and <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn">Create Account 🚀</button>
+                </form>
+
+                <div class="login-link">
+                    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthContainer = document.getElementById('passwordStrength');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            if (password.length === 0) {
+                strengthContainer.classList.remove('show');
+                return;
+            }
+            
+            strengthContainer.classList.add('show');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+            } else if (strength === 3) {
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.classList.add('strong');
+            }
+        });
+
+        // Password confirmation validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('⚠️ Passwords do not match! Please try again.');
+                document.getElementById('confirm_password').focus();
+            }
+        });
+
+        // Real-time password match indicator
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    this.style.borderColor = '#4caf50';
+                } else {
+                    this.style.borderColor = '#f44336';
+                }
+            } else {
+                this.style.borderColor = '#e0e0e0';
+            }
+        });
+    </script>
+</body>
+</html>
