@@ -397,7 +397,7 @@
                             <div class="message-content">
                                 <div class="message-header">
                                     <span class="message-sender">{{ msg.sender_name }}</span>
-                                    <span class="message-time">{{ msg.timestamp }}</span>
+                                    <span class="message-time">{{ msg.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</span>
                                 </div>
                                 <div class="message-bubble">{{ msg.message }}</div>
                             </div>
@@ -417,11 +417,55 @@
     </div>
 
     <script>
-        // Auto-scroll to bottom of messages
         const messagesContainer = document.getElementById('messagesContainer');
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        const productId = {{ product.id }};
+        let lastMessageCount = {{ messages|length }};
 
-        // Auto-resize textarea
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        scrollToBottom();
+
+        function checkForNewMessages() {
+            fetch('/api/chat/' + productId + '/messages')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > lastMessageCount) {
+                        const emptyChat = messagesContainer.querySelector('.empty-chat');
+                        if (emptyChat) {
+                            emptyChat.remove();
+                        }
+
+                        for (let i = lastMessageCount; i < data.length; i++) {
+                            const msg = data[i];
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'message ' + msg.sender_role + '-message';
+                            
+                            const avatar = msg.sender_role === 'admin' ? '&#x1F464;' : '&#x1F468;&#x200D;&#x1F33E;';
+                            
+                            messageDiv.innerHTML = `
+                                <div class="message-avatar">${avatar}</div>
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <span class="message-sender">${msg.sender_name}</span>
+                                        <span class="message-time">${msg.timestamp}</span>
+                                    </div>
+                                    <div class="message-bubble">${msg.message}</div>
+                                </div>
+                            `;
+                            
+                            messagesContainer.appendChild(messageDiv);
+                        }
+                        
+                        lastMessageCount = data.length;
+                        scrollToBottom();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(checkForNewMessages, 2000);
+
         const textarea = document.querySelector('textarea');
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';

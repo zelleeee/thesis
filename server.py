@@ -1,71 +1,120 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import re
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+import json
 
 app = Flask(__name__)
 app.secret_key = "harvestiq_secret_key_change_in_production"
 
-# Dummy user database
-USERS = {
-    "admin@test.com": {"password": "1234", "name": "Admin User", "role": "admin"},
-    "farmer@test.com": {"password": "abcd", "name": "Farmer User", "role": "farmer"},
-    "buyer@test.com": {"password": "pass", "name": "Buyer User", "role": "buyer"}
-}
+# Database configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///harvestiq.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-# Dummy database for products awaiting admin review
-PENDING_PRODUCTS = []
+# Session configurations
+app.config.update(
+    SESSION_COOKIE_SECURE=False,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
 
-# Approved products that will be shown in marketplace
-APPROVED_PRODUCTS = []
+# Database Models
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
 
-# Chat messages database - structure: {product_id: [messages]}
-CHAT_MESSAGES = {}
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    farmer_email = db.Column(db.String(120), nullable=False)
+    farmer_name = db.Column(db.String(120), nullable=False)
+    product_name = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    unit = db.Column(db.String(20), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    harvest_date = db.Column(db.String(20), nullable=False)
+    duration = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Add test data on startup (REMOVE THIS AFTER TESTING)
-def initialize_test_data():
-    PENDING_PRODUCTS.append({
-        "id": 1,
-        "farmer_email": "farmer@test.com",
-        "farmer_name": "Farmer User",
-        "product_name": "Organic Rice",
-        "category": "grains",
-        "description": "Premium organic rice grown without pesticides. Fresh harvest from our farm.",
-        "quantity": 150.0,
-        "unit": "kg",
-        "price": 45.50,
-        "harvest_date": "2025-01-15",
-        "duration": 30,
-        "status": "Pending"
-    })
-    
-    PENDING_PRODUCTS.append({
-        "id": 2,
-        "farmer_email": "farmer@test.com",
-        "farmer_name": "Farmer User",
-        "product_name": "Fresh Tomatoes",
-        "category": "vegetables",
-        "description": "Juicy red tomatoes, perfect for salads and cooking. Pesticide-free.",
-        "quantity": 50.0,
-        "unit": "kg",
-        "price": 35.00,
-        "harvest_date": "2025-01-20",
-        "duration": 15,
-        "status": "Pending"
-    })
-    
-    # Initialize empty chat for test products
-    CHAT_MESSAGES[1] = []
-    CHAT_MESSAGES[2] = []
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, nullable=False)
+    sender_email = db.Column(db.String(120), nullable=False)
+    sender_name = db.Column(db.String(120), nullable=False)
+    sender_role = db.Column(db.String(20), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read_by_farmer = db.Column(db.Boolean, default=False)
+    read_by_admin = db.Column(db.Boolean, default=False)
 
-# Call this when app starts
-initialize_test_data()
+# Initialize database and create test data
+def initialize_database():
+    with app.app_context():
+        db.create_all()
+        
+        # Create default users if they don't exist
+        if not User.query.filter_by(email='admin@test.com').first():
+            admin = User(email='admin@test.com', password='1234', name='Admin User', role='admin')
+            db.session.add(admin)
+        
+        if not User.query.filter_by(email='farmer@test.com').first():
+            farmer = User(email='farmer@test.com', password='abcd', name='Farmer User', role='farmer')
+            db.session.add(farmer)
+        
+        if not User.query.filter_by(email='buyer@test.com').first():
+            buyer = User(email='buyer@test.com', password='pass', name='Buyer User', role='buyer')
+            db.session.add(buyer)
+        
+        db.session.commit()
+        
+        # Add test products if none exist
+        if Product.query.count() == 0:
+            test_product1 = Product(
+                farmer_email='farmer@test.com',
+                farmer_name='Farmer User',
+                product_name='Organic Rice',
+                category='grains',
+                description='Premium organic rice grown without pesticides.',
+                quantity=150.0,
+                unit='kg',
+                price=45.50,
+                harvest_date='2025-01-15',
+                duration=30,
+                status='Pending'
+            )
+            
+            test_product2 = Product(
+                farmer_email='farmer@test.com',
+                farmer_name='Farmer User',
+                product_name='Fresh Tomatoes',
+                category='vegetables',
+                description='Juicy red tomatoes, pesticide-free.',
+                quantity=50.0,
+                unit='kg',
+                price=35.00,
+                harvest_date='2025-01-20',
+                duration=15,
+                status='Pending'
+            )
+            
+            db.session.add(test_product1)
+            db.session.add(test_product2)
+            db.session.commit()
 
-# Helper function to validate email format
+# Call initialization
+initialize_database()
+
+# Helper functions
 def is_valid_email(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
-# Helper function to validate password strength
 def is_valid_password(password):
     return len(password) >= 8
 
@@ -77,9 +126,6 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if "user" in session:
-        return redirect(url_for("dashboard"))
-    
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -88,16 +134,21 @@ def login():
             flash("Please enter both email and password.", "error")
             return render_template("login.html")
 
-        user = USERS.get(email)
-        if user and user["password"] == password:
-            session["user"] = email
-            session["name"] = user["name"]
-            session["role"] = user["role"]
-            flash(f"Welcome back, {user['name']}!", "success")
+        user = User.query.filter_by(email=email).first()
+        if user and user.password == password:
+            session.clear()
+            session["user"] = user.email
+            session["name"] = user.name
+            session["role"] = user.role
+            session.permanent = False
+            flash(f"Welcome back, {user.name}!", "success")
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid email or password. Please try again.", "error")
             return render_template("login.html")
+    
+    if "user" in session:
+        return redirect(url_for("dashboard"))
     
     return render_template("login.html")
 
@@ -126,7 +177,7 @@ def register():
             flash("Please enter a valid email address.", "error")
             return render_template("register.html")
 
-        if email in USERS:
+        if User.query.filter_by(email=email).first():
             flash("This email is already registered. Please login instead.", "error")
             return render_template("register.html")
 
@@ -142,11 +193,9 @@ def register():
             flash("You must agree to the Terms & Conditions.", "error")
             return render_template("register.html")
 
-        USERS[email] = {
-            "password": password,
-            "name": name,
-            "role": role
-        }
+        new_user = User(email=email, password=password, name=name, role=role)
+        db.session.add(new_user)
+        db.session.commit()
 
         flash(f"Account created successfully! Please login to continue.", "success")
         return redirect(url_for("login"))
@@ -193,34 +242,27 @@ def submit_product():
                 flash("Quantity, price, and duration must be positive values.", "error")
                 return render_template("product_submission.html")
         except ValueError:
-            flash("Please enter valid numeric values for quantity, price, and duration.", "error")
+            flash("Please enter valid numeric values.", "error")
             return render_template("product_submission.html")
         
-        # Generate new product ID
-        all_products = PENDING_PRODUCTS + APPROVED_PRODUCTS
-        product_id = max([p["id"] for p in all_products], default=0) + 1
+        new_product = Product(
+            farmer_email=session["user"],
+            farmer_name=session["name"],
+            product_name=product_name,
+            category=category,
+            description=description,
+            quantity=quantity,
+            unit=unit,
+            price=price,
+            harvest_date=harvest_date,
+            duration=duration,
+            status='Pending'
+        )
         
-        submission = {
-            "id": product_id,
-            "farmer_email": session["user"],
-            "farmer_name": session["name"],
-            "product_name": product_name,
-            "category": category,
-            "description": description,
-            "quantity": quantity,
-            "unit": unit,
-            "price": price,
-            "harvest_date": harvest_date,
-            "duration": duration,
-            "status": "Pending"
-        }
+        db.session.add(new_product)
+        db.session.commit()
         
-        PENDING_PRODUCTS.append(submission)
-        
-        # Initialize empty chat for this product
-        CHAT_MESSAGES[product_id] = []
-        
-        flash("Product submission successful! The Admin will review your listing shortly.", "success")
+        flash("Product submitted successfully!", "success")
         return redirect(url_for("my_submissions"))
 
     return render_template("product_submission.html")
@@ -231,197 +273,181 @@ def my_submissions():
         flash("Only farmers can view submissions.", "error")
         return redirect(url_for("dashboard"))
     
-    farmer_email = session["user"]
-    submissions = [p for p in PENDING_PRODUCTS if p["farmer_email"] == farmer_email]
-    submissions += [p for p in APPROVED_PRODUCTS if p["farmer_email"] == farmer_email]
+    submissions = Product.query.filter_by(farmer_email=session["user"]).order_by(Product.id.desc()).all()
     
-    submissions.sort(key=lambda x: x["id"], reverse=True)
-    
-    # Add unread message count for each submission
+    # Add unread count
     for submission in submissions:
-        unread_count = 0
-        if submission["id"] in CHAT_MESSAGES:
-            for msg in CHAT_MESSAGES[submission["id"]]:
-                if msg["sender_role"] == "admin" and not msg.get("read_by_farmer", False):
-                    unread_count += 1
-        submission["unread_count"] = unread_count
+        unread_count = ChatMessage.query.filter_by(
+            product_id=submission.id,
+            sender_role='admin',
+            read_by_farmer=False
+        ).count()
+        submission.unread_count = unread_count
     
     return render_template("my_submissions.html", submissions=submissions)
 
 @app.route("/admin/review")
 def admin_review():
     if "user" not in session or session["role"] != "admin":
-        flash("Access denied. Only admins can review products.", "error")
+        flash("Access denied.", "error")
         return redirect(url_for("dashboard"))
     
-    # Add unread message count for each pending product
-    for product in PENDING_PRODUCTS:
-        unread_count = 0
-        if product["id"] in CHAT_MESSAGES:
-            for msg in CHAT_MESSAGES[product["id"]]:
-                if msg["sender_role"] == "farmer" and not msg.get("read_by_admin", False):
-                    unread_count += 1
-        product["unread_count"] = unread_count
+    pending_products = Product.query.filter_by(status='Pending').order_by(Product.id.desc()).all()
     
-    return render_template("admin_review.html", pending_products=PENDING_PRODUCTS)
+    # Add unread count
+    for product in pending_products:
+        unread_count = ChatMessage.query.filter_by(
+            product_id=product.id,
+            sender_role='farmer',
+            read_by_admin=False
+        ).count()
+        product.unread_count = unread_count
+    
+    return render_template("admin_review.html", pending_products=pending_products)
 
 @app.route("/admin/chat/<int:product_id>", methods=["GET", "POST"])
 def admin_chat(product_id):
     if "user" not in session or session["role"] != "admin":
-        flash("Access denied. Only admins can access this chat.", "error")
+        flash("Access denied.", "error")
         return redirect(url_for("dashboard"))
     
-    # Find the product
-    product = None
-    for p in PENDING_PRODUCTS:
-        if p["id"] == product_id:
-            product = p
-            break
-    
+    product = Product.query.filter_by(id=product_id, status='Pending').first()
     if not product:
         flash("Product not found.", "error")
         return redirect(url_for("admin_review"))
     
-    # Mark all farmer messages as read by admin
-    if product_id in CHAT_MESSAGES:
-        for msg in CHAT_MESSAGES[product_id]:
-            if msg["sender_role"] == "farmer":
-                msg["read_by_admin"] = True
+    # Mark farmer messages as read
+    ChatMessage.query.filter_by(
+        product_id=product_id,
+        sender_role='farmer',
+        read_by_admin=False
+    ).update({'read_by_admin': True})
+    db.session.commit()
     
     if request.method == "POST":
         message_text = request.form.get("message", "").strip()
         
         if message_text:
-            if product_id not in CHAT_MESSAGES:
-                CHAT_MESSAGES[product_id] = []
-            
-            message = {
-                "sender_email": session["user"],
-                "sender_name": session["name"],
-                "sender_role": "admin",
-                "message": message_text,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "read_by_farmer": False,
-                "read_by_admin": True
-            }
-            
-            CHAT_MESSAGES[product_id].append(message)
+            new_message = ChatMessage(
+                product_id=product_id,
+                sender_email=session["user"],
+                sender_name=session["name"],
+                sender_role='admin',
+                message=message_text,
+                read_by_admin=True,
+                read_by_farmer=False
+            )
+            db.session.add(new_message)
+            db.session.commit()
             flash("Message sent!", "success")
             return redirect(url_for("admin_chat", product_id=product_id))
     
-    messages = CHAT_MESSAGES.get(product_id, [])
-    
+    messages = ChatMessage.query.filter_by(product_id=product_id).order_by(ChatMessage.timestamp).all()
     return render_template("admin_chat.html", product=product, messages=messages)
 
 @app.route("/farmer/chat/<int:product_id>", methods=["GET", "POST"])
 def farmer_chat(product_id):
     if "user" not in session or session["role"] != "farmer":
-        flash("Access denied. Only farmers can access this chat.", "error")
+        flash("Access denied.", "error")
         return redirect(url_for("dashboard"))
     
-    # Find the product (check both pending and approved)
-    product = None
-    for p in PENDING_PRODUCTS + APPROVED_PRODUCTS:
-        if p["id"] == product_id and p["farmer_email"] == session["user"]:
-            product = p
-            break
-    
+    product = Product.query.filter_by(id=product_id, farmer_email=session["user"]).first()
     if not product:
-        flash("Product not found or you don't have access.", "error")
+        flash("Product not found.", "error")
         return redirect(url_for("my_submissions"))
     
-    # Mark all admin messages as read by farmer
-    if product_id in CHAT_MESSAGES:
-        for msg in CHAT_MESSAGES[product_id]:
-            if msg["sender_role"] == "admin":
-                msg["read_by_farmer"] = True
+    # Mark admin messages as read
+    ChatMessage.query.filter_by(
+        product_id=product_id,
+        sender_role='admin',
+        read_by_farmer=False
+    ).update({'read_by_farmer': True})
+    db.session.commit()
     
     if request.method == "POST":
         message_text = request.form.get("message", "").strip()
         
         if message_text:
-            if product_id not in CHAT_MESSAGES:
-                CHAT_MESSAGES[product_id] = []
-            
-            message = {
-                "sender_email": session["user"],
-                "sender_name": session["name"],
-                "sender_role": "farmer",
-                "message": message_text,
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "read_by_farmer": True,
-                "read_by_admin": False
-            }
-            
-            CHAT_MESSAGES[product_id].append(message)
+            new_message = ChatMessage(
+                product_id=product_id,
+                sender_email=session["user"],
+                sender_name=session["name"],
+                sender_role='farmer',
+                message=message_text,
+                read_by_farmer=True,
+                read_by_admin=False
+            )
+            db.session.add(new_message)
+            db.session.commit()
             flash("Message sent!", "success")
             return redirect(url_for("farmer_chat", product_id=product_id))
     
-    messages = CHAT_MESSAGES.get(product_id, [])
-    
+    messages = ChatMessage.query.filter_by(product_id=product_id).order_by(ChatMessage.timestamp).all()
     return render_template("farmer_chat.html", product=product, messages=messages)
+
+# API endpoint for real-time chat updates
+@app.route("/api/chat/<int:product_id>/messages")
+def get_chat_messages(product_id):
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    messages = ChatMessage.query.filter_by(product_id=product_id).order_by(ChatMessage.timestamp).all()
+    
+    messages_data = [{
+        'sender_name': msg.sender_name,
+        'sender_role': msg.sender_role,
+        'message': msg.message,
+        'timestamp': msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    } for msg in messages]
+    
+    return jsonify(messages_data)
 
 @app.route("/admin/approve/<int:product_id>", methods=["POST"])
 def admin_approve(product_id):
     if "user" not in session or session["role"] != "admin":
-        flash("Access denied. Only admins can approve products.", "error")
+        flash("Access denied.", "error")
         return redirect(url_for("dashboard"))
     
-    product = None
-    for i, p in enumerate(PENDING_PRODUCTS):
-        if p["id"] == product_id:
-            product = PENDING_PRODUCTS.pop(i)
-            break
-    
+    product = Product.query.get(product_id)
     if product:
-        product["status"] = "Approved"
-        APPROVED_PRODUCTS.append(product)
-        flash(f"Product '{product['product_name']}' has been approved and added to the marketplace!", "success")
-    else:
-        flash("Product not found.", "error")
+        product.status = 'Approved'
+        db.session.commit()
+        flash(f"Product '{product.product_name}' approved!", "success")
     
     return redirect(url_for("admin_review"))
 
 @app.route("/admin/reject/<int:product_id>", methods=["POST"])
 def admin_reject(product_id):
     if "user" not in session or session["role"] != "admin":
-        flash("Access denied. Only admins can reject products.", "error")
+        flash("Access denied.", "error")
         return redirect(url_for("dashboard"))
     
-    product = None
-    for i, p in enumerate(PENDING_PRODUCTS):
-        if p["id"] == product_id:
-            product = PENDING_PRODUCTS.pop(i)
-            break
-    
+    product = Product.query.get(product_id)
     if product:
-        product["status"] = "Rejected"
-        APPROVED_PRODUCTS.append(product)
-        flash(f"Product '{product['product_name']}' has been rejected.", "success")
-    else:
-        flash("Product not found.", "error")
+        product.status = 'Rejected'
+        db.session.commit()
+        flash(f"Product '{product.product_name}' rejected.", "success")
     
     return redirect(url_for("admin_review"))
 
 @app.route("/logout")
 def logout():
     name = session.get("name", "User")
-    session.clear()
-    flash(f"Goodbye, {name}! You have been logged out successfully.", "success")
-    return redirect(url_for("login"))
+    for key in list(session.keys()):
+        session.pop(key)
+    session.modified = True
+    flash(f"Goodbye, {name}!", "success")
+    response = redirect(url_for("login"))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-
-        if not email or not is_valid_email(email):
-            flash("Please enter a valid email address.", "error")
-            return redirect(url_for("forgot_password"))
-
-        flash("If an account associated with that email exists, a password reset link has been sent. Check your inbox!", "success")
+        flash("Password reset link sent!", "success")
         return redirect(url_for("login"))
-
     return render_template("forgot_password.html")
 
 @app.route("/terms")
@@ -431,25 +457,6 @@ def terms():
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
-
-# Debug route - remove in production
-@app.route("/debug")
-def debug():
-    return f"""
-    <h2>Debug Info</h2>
-    <p>Pending Products: {len(PENDING_PRODUCTS)}</p>
-    <p>Approved Products: {len(APPROVED_PRODUCTS)}</p>
-    <p>Chat Messages: {len(CHAT_MESSAGES)}</p>
-    <p>Products: {PENDING_PRODUCTS}</p>
-    """
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template("404.html"), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template("500.html"), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
