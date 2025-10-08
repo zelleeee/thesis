@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - HarvestIQ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d7a3e;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #666;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 30px;
+        }
+
+        .checkout-form {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #2d7a3e;
+            box-shadow: 0 0 0 3px rgba(45, 122, 62, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .payment-option {
+            position: relative;
+        }
+
+        .payment-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .payment-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .payment-option input[type="radio"]:checked + .payment-label {
+            border-color: #2d7a3e;
+            background: #f0f8f0;
+            box-shadow: 0 0 0 3px rgba(45, 122, 62, 0.1);
+        }
+
+        .payment-icon {
+            font-size: 28px;
+        }
+
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .payment-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .order-summary {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-items {
+            margin-bottom: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .item-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #e0e0e0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        .item-details {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: #2d7a3e;
+            font-size: 16px;
+        }
+
+        .summary-divider {
+            height: 2px;
+            background: #e0e0e0;
+            margin: 20px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 15px;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .summary-total {
+            margin-top: 15px;
+            padding-top: 20px;
+            border-top: 3px solid #2d7a3e;
+        }
+
+        .summary-total .summary-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .summary-total .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d7a3e;
+        }
+
+        .btn-place-order {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2d7a3e, #3a9d4c);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-place-order:hover {
+            background: linear-gradient(135deg, #246630, #2d7a3e);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 122, 62, 0.3);
+        }
+
+        .btn-place-order:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .alert.error {
+            background: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .alert.error::before {
+            content: '⚠️';
+            font-size: 20px;
+        }
+
+        .alert.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .alert.success::before {
+            content: '✅';
+            font-size: 20px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-shop {
+            display: inline-block;
+            padding: 14px 32px;
+            background: #2d7a3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-shop:hover {
+            background: #246630;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 122, 62, 0.3);
+        }
+
+        .secure-notice {
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+
+        @media (max-width: 968px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: relative;
+                top: 0;
+                order: -1;
+            }
+
+            .payment-options {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-form {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .checkout-form {
+                padding: 20px;
+            }
+
+            .order-summary {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{{ url_for('marketplace') }}" class="logo">🌾 HarvestIQ</a>
+            <a href="{{ url_for('marketplace') }}" class="btn-back">← Back to Marketplace</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div id="checkoutContainer">
+            <!-- This will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Load cart from localStorage
+        const cart = JSON.parse(localStorage.getItem('checkout_cart') || '[]');
+
+        // If cart is empty, show empty state
+        if (cart.length === 0) {
+            document.getElementById('checkoutContainer').innerHTML = `
+                <div class="empty-cart">
+                    <div class="empty-icon">🛒</div>
+                    <h2 class="empty-title">Your Cart is Empty</h2>
+                    <p class="empty-text">Add some products to your cart before checking out.</p>
+                    <a href="{{ url_for('marketplace') }}" class="btn-shop">Start Shopping</a>
+                </div>
+            `;
+        } else {
+            // Calculate totals
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+
+            const deliveryFee = 50;
+            const total = subtotal + deliveryFee;
+
+            // Render checkout page
+            document.getElementById('checkoutContainer').innerHTML = `
+                <div class="checkout-content">
+                    <div class="checkout-form">
+                        <h1 class="page-title">Complete Your Order</h1>
+
+                        <form method="POST" id="checkoutForm">
+                            <input type="hidden" name="cart_data" id="cartData" value='${JSON.stringify(cart)}'>
+
+                            <!-- Delivery Information -->
+                            <div class="form-section">
+                                <h2 class="section-title">
+                                    <span class="section-icon">📍</span>
+                                    Delivery Information
+                                </h2>
+
+                                <div class="form-group">
+                                    <label for="contact_number">
+                                        Contact Number <span class="required">*</span>
+                                    </label>
+                                    <input type="tel" 
+                                           id="contact_number" 
+                                           name="contact_number" 
+                                           placeholder="09123456789" 
+                                           pattern="[0-9]{11}"
+                                           required>
+                                    <div class="helper-text">Enter your 11-digit mobile number</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="delivery_address">
+                                        Complete Delivery Address <span class="required">*</span>
+                                    </label>
+                                    <textarea id="delivery_address" 
+                                              name="delivery_address" 
+                                              placeholder="House No., Street, Barangay, City, Province, Zip Code" 
+                                              required></textarea>
+                                    <div class="helper-text">Please provide your complete address for accurate delivery</div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="form-section">
+                                <h2 class="section-title">
+                                    <span class="section-icon">💳</span>
+                                    Payment Method
+                                </h2>
+
+                                <div class="payment-options">
+                                    <div class="payment-option">
+                                        <input type="radio" 
+                                               id="cod" 
+                                               name="payment_method" 
+                                               value="Cash on Delivery" 
+                                               required
+                                               checked>
+                                        <label for="cod" class="payment-label">
+                                            <span class="payment-icon">💵</span>
+                                            <div class="payment-info">
+                                                <span class="payment-name">Cash on Delivery</span>
+                                                <span class="payment-desc">Pay when you receive</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="payment-option">
+                                        <input type="radio" 
+                                               id="gcash" 
+                                               name="payment_method" 
+                                               value="GCash">
+                                        <label for="gcash" class="payment-label">
+                                            <span class="payment-icon">📱</span>
+                                            <div class="payment-info">
+                                                <span class="payment-name">GCash</span>
+                                                <span class="payment-desc">Mobile wallet</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="payment-option">
+                                        <input type="radio" 
+                                               id="bank" 
+                                               name="payment_method" 
+                                               value="Bank Transfer">
+                                        <label for="bank" class="payment-label">
+                                            <span class="payment-icon">🏦</span>
+                                            <div class="payment-info">
+                                                <span class="payment-name">Bank Transfer</span>
+                                                <span class="payment-desc">Direct bank deposit</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="payment-option">
+                                        <input type="radio" 
+                                               id="paymaya" 
+                                               name="payment_method" 
+                                               value="PayMaya">
+                                        <label for="paymaya" class="payment-label">
+                                            <span class="payment-icon">💳</span>
+                                            <div class="payment-info">
+                                                <span class="payment-name">PayMaya</span>
+                                                <span class="payment-desc">Digital payment</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="secure-notice">
+                                    🔒 Your payment information is secure and encrypted
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <h2 class="summary-title">
+                            📋 Order Summary
+                        </h2>
+
+                        <div class="order-items">
+                            ${cart.map(item => {
+                                const itemTotal = item.price * item.quantity;
+                                return `
+                                    <div class="order-item">
+                                        ${item.image ? 
+                                            `<img src="/static/uploads/products/${item.image}" class="item-image" alt="${item.name}">` :
+                                            '<div class="item-image" style="display: flex; align-items: center; justify-content: center; color: #999;">📷</div>'
+                                        }
+                                        <div class="item-info">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="item-details">${item.quantity} ${item.unit} × ₱${item.price.toFixed(2)}/kg</div>
+                                            <div class="item-price">₱${itemTotal.toFixed(2)}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <div class="summary-divider"></div>
+
+                        <div class="summary-row">
+                            <span class="summary-label">Subtotal (${cart.length} item${cart.length > 1 ? 's' : ''})</span>
+                            <span class="summary-value">₱${subtotal.toFixed(2)}</span>
+                        </div>
+
+                        <div class="summary-row">
+                            <span class="summary-label">Delivery Fee</span>
+                            <span class="summary-value">₱${deliveryFee.toFixed(2)}</span>
+                        </div>
+
+                        <div class="summary-row summary-total">
+                            <span class="summary-label">Total</span>
+                            <span class="summary-value">₱${total.toFixed(2)}</span>
+                        </div>
+
+                        <button type="submit" form="checkoutForm" class="btn-place-order">
+                            Place Order (₱${total.toFixed(2)})
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Handle form submission
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                // Clear cart after successful submission
+                localStorage.removeItem('checkout_cart');
+                localStorage.removeItem('harvestiq_cart');
+            });
+        }
+    </script>
+</body>
+</html>

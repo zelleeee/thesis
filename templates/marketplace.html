@@ -1,75 +1,851 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ Marketplace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block title %}Farmer Marketplace - HarvestIQ{% endblock %}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
 
-{% block content %}
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-<div class="max-w-6xl mx-auto">
-<header class="bg-white shadow-lg rounded-xl p-6 mb-8 border-t-4 border-emerald-600">
-<h1 class="text-4xl font-extrabold text-gray-900 mb-2">Marketplace Seller Center 👋</h1>
-<p class="text-xl text-gray-500">Welcome, {{ name }}. Manage your product listings and sales orders.</p>
-<div class="mt-4 inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-green-100 text-green-800">
-User Role: {{ role }}
-</div>
-</header>
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-<!-- Marketplace Actions and Overview -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    
-    <!-- Quick Action Card -->
-    <div class="bg-emerald-600 p-6 rounded-xl shadow-xl text-white md:col-span-1 flex flex-col justify-between">
-        <div>
-            <h3 class="text-2xl font-bold mb-2">List New Harvest</h3>
-            <p class="text-emerald-100">Quickly create a new product listing for your fresh crops.</p>
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2d7a3e;
+            text-decoration: none;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .user-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .user-link:hover {
+            color: #2d7a3e;
+        }
+
+        /* Search and Filter Section */
+        .search-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #2d7a3e;
+        }
+
+        .category-select {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .cart-button {
+            padding: 15px 30px;
+            background: #2d7a3e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .cart-button:hover {
+            background: #246630;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(45, 122, 62, 0.3);
+        }
+
+        .cart-count {
+            background: white;
+            color: #2d7a3e;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Results Header */
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .results-info {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .results-count {
+            font-weight: 700;
+            color: #2d7a3e;
+        }
+
+        .clear-filter {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            color: #666;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .clear-filter:hover {
+            background: #e0e0e0;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #2d7a3e, #4caf50);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .no-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .stock-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(45, 122, 62, 0.95);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 48px;
+        }
+
+        .farmer-name {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .price-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d7a3e;
+        }
+
+        .price-unit {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .stock-info {
+            font-size: 13px;
+            color: #666;
+            text-align: right;
+        }
+
+        .add-to-cart-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .quantity-input {
+            width: 80px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            padding: 12px;
+            background: #2d7a3e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-cart:hover {
+            background: #246630;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .empty-icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .btn-browse {
+            padding: 15px 35px;
+            background: #2d7a3e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-browse:hover {
+            background: #246630;
+            transform: translateY(-2px);
+        }
+
+        /* Cart Modal */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-modal.show {
+            display: flex;
+        }
+
+        .cart-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .cart-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .close-cart {
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .close-cart:hover {
+            color: #333;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            color: #2d7a3e;
+            font-weight: 700;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .remove-item {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .cart-total {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            background: #2d7a3e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-checkout:hover {
+            background: #246630;
+        }
+
+        @media (max-width: 768px) {
+            .search-section {
+                flex-direction: column;
+            }
+
+            .category-select {
+                width: 100%;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+
+            .product-name {
+                font-size: 14px;
+            }
+
+            .price-value {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-container">
+            <div class="top-bar">
+                <a href="{{ url_for('marketplace') }}" class="logo">🌾 HarvestIQ</a>
+                <div class="user-menu">
+                    <a href="{{ url_for('dashboard') }}" class="user-link">Dashboard</a>
+                    <a href="{{ url_for('my_orders') }}" class="user-link">My Orders</a>
+                    <a href="{{ url_for('logout') }}" class="user-link">Logout</a>
+                </div>
+            </div>
+
+            <form method="GET" action="{{ url_for('marketplace') }}" class="search-section">
+                <div class="search-box">
+                    <input type="text" 
+                           name="search" 
+                           class="search-input" 
+                           placeholder="Search for tomatoes, eggs, honey..."
+                           value="{{ search_query or '' }}">
+                </div>
+
+                <select name="category" class="category-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <option value="vegetables" {% if category_filter == 'vegetables' %}selected{% endif %}>Vegetables</option>
+                    <option value="fruits" {% if category_filter == 'fruits' %}selected{% endif %}>Fruits</option>
+                    <option value="grains" {% if category_filter == 'grains' %}selected{% endif %}>Grains</option>
+                    <option value="herbs" {% if category_filter == 'herbs' %}selected{% endif %}>Herbs & Spices</option>
+                    <option value="livestock" {% if category_filter == 'livestock' %}selected{% endif %}>Livestock</option>
+                    <option value="other" {% if category_filter == 'other' %}selected{% endif %}>Other</option>
+                </select>
+
+                <button type="button" class="cart-button" onclick="openCart()">
+                    🛒 View Cart (<span id="cartCount">0</span> items)
+                </button>
+            </form>
         </div>
-        <button class="mt-4 w-full bg-white text-emerald-600 font-semibold py-2 rounded-lg shadow-md hover:bg-emerald-50 transition duration-150 transform hover:scale-[1.02]">
-            + Create Listing
-        </button>
     </div>
 
-    <!-- Inventory Overview -->
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 md:col-span-2">
-        <h3 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Your Active Listings (Placeholder)</h3>
-        <div class="space-y-4">
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
-                <span class="font-medium text-gray-700">Premium Tomatoes (150kg)</span>
-                <span class="text-sm text-green-600 font-semibold">Live</span>
+    <!-- Main Content -->
+    <div class="container">
+        <div class="results-header">
+            <div class="results-info">
+                <span class="results-count">{{ products|length }}</span> products found
+                {% if search_query %} for "{{ search_query }}"{% endif %}
+                {% if category_filter %} in {{ category_filter }}{% endif %}
             </div>
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
-                <span class="font-medium text-gray-700">Organic Corn (300 bags)</span>
-                <span class="text-sm text-yellow-600 font-semibold">Draft</span>
+            {% if search_query or category_filter %}
+                <a href="{{ url_for('marketplace') }}" class="clear-filter">Clear Filters</a>
+            {% endif %}
+        </div>
+
+        {% if products|length == 0 %}
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h2 class="empty-title">No Products Found</h2>
+                <p class="empty-text">
+                    {% if search_query or category_filter %}
+                        Try adjusting your search or browse all categories
+                    {% else %}
+                        No products are currently available in the marketplace
+                    {% endif %}
+                </p>
+                {% if search_query or category_filter %}
+                    <a href="{{ url_for('marketplace') }}" class="btn-browse">View All Products</a>
+                {% endif %}
             </div>
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
-                <span class="font-medium text-gray-700">Fresh Lettuce (50 crates)</span>
-                <span class="text-sm text-green-600 font-semibold">Live</span>
+        {% else %}
+            <div class="products-grid">
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-image-wrapper">
+                            {% if product.image_filename %}
+                                <img src="{{ url_for('static', filename='uploads/products/' + product.image_filename) }}" 
+                                     alt="{{ product.product_name }}" 
+                                     class="product-image">
+                            {% else %}
+                                <div class="no-image">📷</div>
+                            {% endif %}
+                            <span class="stock-badge">{{ product.quantity }} {{ product.unit }} Left</span>
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-category">{{ product.category }}</div>
+                            <h3 class="product-name">{{ product.product_name }}</h3>
+                            <div class="farmer-name">
+                                <span>👨‍🌾</span>
+                                <span>from {{ product.farmer_name }}</span>
+                            </div>
+
+                            <div class="product-footer">
+                                <div class="price-section">
+                                    <span class="price-value">₱{{ "%.0f"|format(product.price) }}</span>
+                                    <span class="price-unit">/kg</span>
+                                </div>
+                                <div class="stock-info">
+                                    Harvested {{ product.harvest_date }}
+                                </div>
+                            </div>
+
+                            <div class="add-to-cart-section">
+                                <input type="number" 
+                                       class="quantity-input" 
+                                       value="1" 
+                                       min="1" 
+                                       max="{{ product.quantity }}"
+                                       id="qty-{{ product.id }}">
+                                <button class="btn-add-cart" 
+                                        onclick="addToCart({{ product.id }}, '{{ product.product_name }}', {{ product.price }}, {{ product.quantity }}, '{{ product.unit }}', '{{ product.image_filename or '' }}')">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
+        {% endif %}
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2 class="cart-title">Shopping Cart</h2>
+                <span class="close-cart" onclick="closeCart()">&times;</span>
+            </div>
+
+            <div class="cart-items" id="cartItems">
+                <p style="text-align: center; color: #999; padding: 40px 0;">Your cart is empty</p>
+            </div>
+
+            <div class="cart-total" id="cartTotalSection" style="display: none;">
+                <div class="total-row">
+                    <span>Total:</span>
+                    <span id="cartTotal">₱0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-checkout" onclick="proceedToCheckout()" id="checkoutBtn" style="display: none;">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        // Load cart from localStorage
+        function loadCart() {
+            const savedCart = localStorage.getItem('harvestiq_cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCartCount();
+            }
+        }
+
+        // Save cart to localStorage
+        function saveCart() {
+            localStorage.setItem('harvestiq_cart', JSON.stringify(cart));
+        }
+
+        // Add to cart
+        function addToCart(productId, name, price, maxQty, unit, image) {
+            const qtyInput = document.getElementById('qty-' + productId);
+            const quantity = parseFloat(qtyInput.value);
+
+            if (quantity <= 0 || quantity > maxQty) {
+                alert('Please enter a valid quantity');
+                return;
+            }
+
+            const existingItem = cart.find(item => item.id === productId);
             
-            <a href="#" class="block text-center mt-4 text-emerald-600 hover:text-emerald-700 font-medium transition duration-150">
-                View All Listings
-            </a>
-        </div>
-    </div>
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                if (existingItem.quantity > maxQty) {
+                    existingItem.quantity = maxQty;
+                    alert('Maximum quantity reached');
+                }
+            } else {
+                cart.push({
+                    id: productId,
+                    name: name,
+                    price: price,
+                    quantity: quantity,
+                    maxQty: maxQty,
+                    unit: unit,
+                    image: image
+                });
+            }
 
-</div>
+            saveCart();
+            updateCartCount();
+            alert('Added to cart!');
+            qtyInput.value = 1;
+        }
 
-<!-- Orders and Analytics Placeholder -->
-<div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-    <h3 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Sales Orders & Metrics</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-        <div class="p-4 rounded-lg bg-blue-50">
-            <p class="text-3xl font-bold text-blue-600">3</p>
-            <p class="text-sm text-gray-600">Pending Orders</p>
-        </div>
-        <div class="p-4 rounded-lg bg-yellow-50">
-            <p class="text-3xl font-bold text-yellow-600">₱12,500</p>
-            <p class="text-sm text-gray-600">Revenue (30 Days)</p>
-        </div>
-        <div class="p-4 rounded-lg bg-red-50">
-            <p class="text-3xl font-bold text-red-600">1</p>
-            <p class="text-sm text-gray-600">Low Stock Alert</p>
-        </div>
-    </div>
-</div>
+        // Update cart count
+        function updateCartCount() {
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
 
-</div>
-{% endblock %}
+        // Open cart modal
+        function openCart() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = calculateTotal();
+
+            cartItems.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    ${item.image ? 
+                        `<img src="/static/uploads/products/${item.image}" class="cart-item-image" alt="${item.name}">` :
+                        '<div class="cart-item-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">📷</div>'
+                    }
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">₱${item.price.toFixed(2)}/kg</div>
+                        <div class="cart-item-quantity">
+                            <button class="qty-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                            <span>${item.quantity} ${item.unit}</span>
+                            <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                            <span class="remove-item" onclick="removeItem(${index})">Remove</span>
+                        </div>
+                        <div style="margin-top: 10px; font-weight: 600; color: #2d7a3e;">
+                            Subtotal: ₱${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('cartTotal').textContent = '₱' + cartTotal.toFixed(2);
+            document.getElementById('cartTotalSection').style.display = 'block';
+            document.getElementById('checkoutBtn').style.display = 'block';
+            document.getElementById('cartModal').classList.add('show');
+        }
+
+        // Close cart modal
+        function closeCart() {
+            document.getElementById('cartModal').classList.remove('show');
+        }
+
+        // Update quantity
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+            
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            } else if (cart[index].quantity > cart[index].maxQty) {
+                cart[index].quantity = cart[index].maxQty;
+                alert('Maximum quantity reached');
+            }
+
+            saveCart();
+            updateCartCount();
+            
+            if (cart.length === 0) {
+                closeCart();
+            } else {
+                openCart();
+            }
+        }
+
+        // Remove item
+        function removeItem(index) {
+            if (confirm('Remove this item from cart?')) {
+                cart.splice(index, 1);
+                saveCart();
+                updateCartCount();
+                
+                if (cart.length === 0) {
+                    closeCart();
+                } else {
+                    openCart();
+                }
+            }
+        }
+
+        // Calculate total
+        function calculateTotal() {
+            return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        // Proceed to checkout
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+
+            // Save cart to session and redirect
+            localStorage.setItem('checkout_cart', JSON.stringify(cart));
+            window.location.href = "{{ url_for('checkout') }}";
+        }
+
+        // Load cart on page load
+        loadCart();
+
+        // Close modal when clicking outside
+        document.getElementById('cartModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCart();
+            }
+        });
+    </script>
+</body>
+</html>

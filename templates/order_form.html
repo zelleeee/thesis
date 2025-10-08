@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HarvestIQ - Place Order</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 50%, #7cb342 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.15) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #4a90e2;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .order-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+
+        .product-sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .product-image-large {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .no-image-large {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: #999;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .product-specs {
+            display: grid;
+            gap: 12px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .spec-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .spec-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .price-highlight {
+            color: #4caf50;
+            font-size: 18px;
+        }
+
+        .order-form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #4a90e2 0%, #7bb3ff 100%);
+            padding: 30px;
+            color: white;
+        }
+
+        .form-header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .form-header p {
+            opacity: 0.95;
+            font-size: 14px;
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert.error {
+            background-color: #fee;
+            color: #c33;
+            border-left: 4px solid #c33;
+        }
+
+        .alert.error::before {
+            content: '\26A0\FE0F';
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 2px dashed #e0e0e0;
+        }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #e53935;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 13px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .payment-option {
+            position: relative;
+        }
+
+        .payment-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .payment-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .payment-option input[type="radio"]:checked + .payment-label {
+            border-color: #4a90e2;
+            background: #e3f2fd;
+        }
+
+        .payment-icon {
+            font-size: 24px;
+        }
+
+        .payment-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-summary {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid rgba(0,0,0,0.2);
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .summary-total {
+            font-size: 20px;
+            color: #4caf50;
+            font-weight: 700;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        @media (max-width: 1024px) {
+            .order-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .product-sidebar {
+                position: relative;
+                top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('marketplace') }}" class="back-button">
+            &larr; Back to Marketplace
+        </a>
+
+        <div class="order-layout">
+            <!-- Product Sidebar -->
+            <div class="product-sidebar">
+                {% if product.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/products/' + product.image_filename) }}" 
+                         alt="{{ product.product_name }}" 
+                         class="product-image-large">
+                {% else %}
+                    <div class="no-image-large">📷</div>
+                {% endif %}
+
+                <h2 class="product-title">{{ product.product_name }}</h2>
+                <span class="category-badge">{{ product.category }}</span>
+
+                <div class="farmer-info">
+                    <span>👨‍🌾</span>
+                    <div>
+                        <div style="font-weight: 600; color: #333;">{{ product.farmer_name }}</div>
+                        <div style="font-size: 12px; color: #666;">{{ product.farmer_email }}</div>
+                    </div>
+                </div>
+
+                <p class="product-description">{{ product.description }}</p>
+
+                <div class="product-specs">
+                    <div class="spec-item">
+                        <span class="spec-label">Available Stock</span>
+                        <span class="spec-value">{{ product.quantity }} {{ product.unit }}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Price per kg</span>
+                        <span class="spec-value price-highlight">₱{{ "%.2f"|format(product.price) }}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Harvest Date</span>
+                        <span class="spec-value">{{ product.harvest_date }}</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Available For</span>
+                        <span class="spec-value">{{ product.duration }} days</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Form -->
+            <div class="order-form-container">
+                <div class="form-header">
+                    <h1>🛒 Place Your Order</h1>
+                    <p>Fill in the details below to complete your purchase</p>
+                </div>
+
+                <div class="form-content">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert {{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" id="orderForm">
+                        <!-- Quantity Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span>📦</span>
+                                Order Quantity
+                            </h3>
+
+                            <div class="form-group">
+                                <label for="quantity">
+                                    Quantity ({{ product.unit }}) <span class="required">*</span>
+                                </label>
+                                <input type="number" id="quantity" name="quantity" 
+                                       placeholder="Enter quantity" 
+                                       step="0.01" min="0.01" max="{{ product.quantity }}" 
+                                       required>
+                                <div class="helper-text">Maximum available: {{ product.quantity }} {{ product.unit }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Information -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span>📍</span>
+                                Delivery Information
+                            </h3>
+
+                            <div class="form-group">
+                                <label for="delivery_address">
+                                    Delivery Address <span class="required">*</span>
+                                </label>
+                                <textarea id="delivery_address" name="delivery_address" 
+                                          placeholder="Enter your complete delivery address" 
+                                          required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contact_number">
+                                    Contact Number <span class="required">*</span>
+                                </label>
+                                <input type="tel" id="contact_number" name="contact_number" 
+                                       placeholder="e.g., 09123456789" 
+                                       required>
+                                <div class="helper-text">We'll use this to coordinate delivery</div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <span>💳</span>
+                                Payment Method
+                            </h3>
+
+                            <div class="payment-options">
+                                <div class="payment-option">
+                                    <input type="radio" id="cod" name="payment_method" value="Cash on Delivery" required>
+                                    <label for="cod" class="payment-label">
+                                        <span class="payment-icon">💵</span>
+                                        <span class="payment-name">Cash on Delivery</span>
+                                    </label>
+                                </div>
+
+                                <div class="payment-option">
+                                    <input type="radio" id="gcash" name="payment_method" value="GCash">
+                                    <label for="gcash" class="payment-label">
+                                        <span class="payment-icon">📱</span>
+                                        <span class="payment-name">GCash</span>
+                                    </label>
+                                </div>
+
+                                <div class="payment-option">
+                                    <input type="radio" id="bank" name="payment_method" value="Bank Transfer">
+                                    <label for="bank" class="payment-label">
+                                        <span class="payment-icon">🏦</span>
+                                        <span class="payment-name">Bank Transfer</span>
+                                    </label>
+                                </div>
+
+                                <div class="payment-option">
+                                    <input type="radio" id="paymaya" name="payment_method" value="PayMaya">
+                                    <label for="paymaya" class="payment-label">
+                                        <span class="payment-icon">💳</span>
+                                        <span class="payment-name">PayMaya</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="order-summary" id="orderSummary" style="display: none;">
+                            <div class="summary-title">📋 Order Summary</div>
+                            <div class="summary-item">
+                                <span class="summary-label">Product</span>
+                                <span class="summary-value">{{ product.product_name }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Quantity</span>
+                                <span class="summary-value"><span id="summaryQty">0</span> {{ product.unit }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Price per kg</span>
+                                <span class="summary-value">₱{{ "%.2f"|format(product.price) }}</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Total Amount</span>
+                                <span class="summary-value summary-total">₱<span id="totalAmount">0.00</span></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit">🛒 Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quantityInput = document.getElementById('quantity');
+        const orderSummary = document.getElementById('orderSummary');
+        const summaryQty = document.getElementById('summaryQty');
+        const totalAmount = document.getElementById('totalAmount');
+        const pricePerKg = {{ product.price }};
+
+        quantityInput.addEventListener('input', function() {
+            const qty = parseFloat(this.value);
+            if (qty > 0) {
+                orderSummary.style.display = 'block';
+                summaryQty.textContent = qty.toFixed(2);
+                const total = qty * pricePerKg;
+                totalAmount.textContent = total.toFixed(2);
+            } else {
+                orderSummary.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
